@@ -4,7 +4,7 @@ Real-time exercise recognition, repetition counting, and calorie estimation usin
 
 Built with **MediaPipe Pose** for skeletal tracking and a deep learning classifier (**LSTM / TCN**) for exercise recognition.
 
----
+----
 
 ## 📌 Overview
 
