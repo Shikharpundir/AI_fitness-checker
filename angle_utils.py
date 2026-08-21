@@ -5,7 +5,7 @@ def calculate_angle(a, b, c):
     """
     Calculates the angle at point b, given three (x, y) points.
     a, b, c: tuples/lists like (x, y)
-    Returns angle in degrees (0-180).
+    Returns angle in degrees (0-180). 
     """
     a, b, c = np.array(a), np.array(b), np.array(c)
     radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
