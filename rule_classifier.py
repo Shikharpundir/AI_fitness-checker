@@ -5,7 +5,7 @@ def classify_exercise(angles):
 
     Returns: exercise label as a string (must match EXERCISE_CONFIG keys in rep_counter.py)
     """
-    l_elbow, r_elbow, l_sh, r_sh, l_hip, r_hip, l_knee, r_knee = angles
+    l_elbow, r_elbow, l_sh, r_sh, l_hip, r_hip, l_knee, r_knee = angles 
 
     avg_elbow = (l_elbow + r_elbow) / 2
     avg_shoulder = (l_sh + r_sh) / 2
