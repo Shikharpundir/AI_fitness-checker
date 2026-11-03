@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<main class="dashboard">
+    <header class="dashboard-heading">
+        <div>
+            <p class="dashboard-eyebrow"><span class="eyebrow-dot"></span> YOUR TRAINING SPACE</p>
+            <h1>Good to see you, {{ current_user.username }}.</h1>
+            <p class="dashboard-subtitle">Small steps. Stronger every session.</p>
+        </div>
+        <a class="profile-chip" href="{{ url_for('profile') }}" aria-label="Open your profile and preferences">
+            <span class="profile-avatar" aria-hidden="true">{{ current_user.username[0]|upper }}</span>
+            <span>
+                <strong>Your profile</strong>
+                <small>{% if current_user.weight_kg %}{{ current_user.weight_kg }} kg{% else %}Profile details{% endif %}</small>
+            </span>
+            <span class="profile-arrow" aria-hidden="true">↗</span>
+        </a>
+    </header>
+
+    <section class="stat-grid" aria-label="Your training totals">
+        <article class="stat-card">
+            <span class="stat-icon stat-icon-lime" aria-hidden="true">↗</span>
+            <div class="stat-copy"><span>Workouts tracked</span><strong>{{ stats.workouts }}</strong><small>All-time sessions</small></div>
+            <span class="stat-sparkline sparkline-one" aria-hidden="true"></span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-icon stat-icon-orange" aria-hidden="true">✳</span>
+            <div class="stat-copy"><span>Calories burned</span><strong>{{ stats.calories|round|int }}<em> kcal</em></strong><small>Estimated total</small></div>
+            <span class="stat-sparkline sparkline-two" aria-hidden="true"></span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-icon stat-icon-blue" aria-hidden="true">◷</span>
+            <div class="stat-copy"><span>Time moving</span><strong>{{ stats.minutes }}<em> min</em></strong><small>Total training time</small></div>
+            <span class="stat-sparkline sparkline-three" aria-hidden="true"></span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-icon stat-icon-purple" aria-hidden="true">⟳</span>
+            <div class="stat-copy"><span>Reps completed</span><strong>{{ stats.reps }}</strong><small>Across tracked workouts</small></div>
+            <span class="stat-sparkline sparkline-four" aria-hidden="true"></span>
+        </article>
+    </section>
+
+    <section class="training-section" aria-labelledby="training-title">
+        <div class="section-heading">
+            <div>
+                <p class="dashboard-eyebrow">PICK YOUR PACE</p>
+                <h2 id="training-title">How do you want to train?</h2>
+            </div>
+            <div class="mode-switch" role="tablist" aria-label="Choose a workout mode">
+                <button class="mode-tab is-active" id="live-tab" type="button" role="tab"
+                        aria-selected="true" aria-controls="live-panel" data-mode="live">
+                    <span aria-hidden="true">◉</span> Live AI coach
+                </button>
+                <button class="mode-tab" id="manual-tab" type="button" role="tab"
+                        aria-selected="false" aria-controls="manual-panel" data-mode="manual" tabindex="-1">
+                    <span aria-hidden="true">▤</span> Manual workout
+                </button>
+            </div>
+        </div>
+
+        <div class="mode-panel" id="live-panel" role="tabpanel" aria-labelledby="live-tab">
+            <div class="live-card">
+                <div class="live-copy">
+                    <span class="feature-tag"><span class="status-pulse"></span> CAMERA-POWERED TRAINING</span>
+                    <h3>Find your rhythm.<br><span>We’ll count every rep.</span></h3>
+                    <p>Turn on your camera and let your AI trainer track repetitions, movement, and estimated calories as you go.</p>
+                    <a class="dashboard-cta" href="{{ url_for('live_training') }}">
+                        Start a live session <span aria-hidden="true">→</span>
+                    </a>
+                    <div class="feature-footnote">
+                        <span aria-hidden="true">✦</span> Camera access is requested only when you start
+                    </div>
+                </div>
+                <div class="pose-preview" aria-label="Illustration of a pose-tracking skeleton">
+                    <div class="preview-topline"><span><i></i> POSE TRACKING PREVIEW</span><span>01 / 03</span></div>
+                    <div class="pose-grid" aria-hidden="true">
+                        <span class="grid-cross cross-one"></span><span class="grid-cross cross-two"></span>
+                        <svg viewBox="0 0 300 300" role="img" aria-label="Pose tracking illustration">
+                            <g class="skeleton-lines">
+                                <path d="M150 58 150 112 117 148 94 205 76 249M117 148 142 205 153 258"/>
+                                <path d="M150 112 184 145 206 194 231 235M184 145 155 202 153 258"/>
+                                <path d="M117 148 155 151 184 145"/>
+                            </g>
+                            <g class="skeleton-joints">
+                                <circle cx="150" cy="45" r="13"/><circle cx="150" cy="112" r="6"/>
+                                <circle cx="117" cy="148" r="7"/><circle cx="184" cy="145" r="7"/>
+                                <circle cx="94" cy="205" r="6"/><circle cx="206" cy="194" r="6"/>
+                                <circle cx="76" cy="249" r="6"/><circle cx="231" cy="235" r="6"/>
+                                <circle cx="142" cy="205" r="7"/><circle cx="155" cy="202" r="7"/>
+                                <circle cx="153" cy="258" r="6"/>
+                            </g>
+                            <path class="angle-guide" d="M94 205a28 28 0 0 1 22-15"/>
+                            <text x="57" y="194">KNEE</text>
+                            <text x="170" y="126">HIP</text>
+                        </svg>
+                    </div>
+                    <div class="preview-bottomline"><span><b></b> Ready when you are</span><span>AI FORM COACH</span></div>
+                </div>
+            </div>
+            <div class="mode-note">
+                <span class="note-icon" aria-hidden="true">i</span>
+                <span>Live sessions use your camera for rep tracking. Form scoring and joint-angle feedback are not available in this version.</span>
+            </div>
+        </div>
+
+        <div class="mode-panel" id="manual-panel" role="tabpanel" aria-labelledby="manual-tab" hidden>
+            <div class="manual-card">
+                <div class="manual-heading">
+                    <div>
+                        <span class="feature-tag feature-tag-blue">YOUR WORKOUT, YOUR WAY</span>
+                        <h3>Choose an exercise</h3>
+                        <p>Choose a movement, set your reps and weights, and track your session without a camera.</p>
+                    </div>
+                    <label class="exercise-search">
+                        <span class="sr-only">Search exercises</span>
+                        <span aria-hidden="true">⌕</span>
+                        <input id="exercise-search" type="search" placeholder="Search exercises…" autocomplete="off">
+                    </label>
+                </div>
+                <div class="muscle-filters" role="group" aria-label="Filter exercises by muscle group">
+                    <button class="filter-chip is-selected" type="button" data-filter="all" aria-pressed="true">All exercises</button>
+                    <button class="filter-chip" type="button" data-filter="legs" aria-pressed="false">Legs</button>
+                    <button class="filter-chip" type="button" data-filter="arms" aria-pressed="false">Arms</button>
+                    <button class="filter-chip" type="button" data-filter="core" aria-pressed="false">Core</button>
+                    <button class="filter-chip" type="button" data-filter="upper" aria-pressed="false">Upper body</button>
+                </div>
+                <div class="exercise-grid" id="exercise-grid">
+                    <a class="exercise-option" data-muscle="legs" href="{{ url_for('manual_training', exercise='Squat') }}">
+                        <span class="exercise-art exercise-art-lime" aria-hidden="true">↘</span><span><strong>Squat</strong><small>Legs · Glutes</small></span><span class="exercise-arrow" aria-hidden="true">→</span>
+                    </a>
+                    <a class="exercise-option" data-muscle="arms upper" href="{{ url_for('manual_training', exercise='Bicep Curl') }}">
+                        <span class="exercise-art exercise-art-orange" aria-hidden="true">↗</span><span><strong>Bicep curl</strong><small>Arms · Biceps</small></span><span class="exercise-arrow" aria-hidden="true">→</span>
+                    </a>
+                    <a class="exercise-option" data-muscle="upper" href="{{ url_for('manual_training', exercise='Push-up') }}">
+                        <span class="exercise-art exercise-art-blue" aria-hidden="true">↔</span><span><strong>Push-up</strong><small>Chest · Shoulders</small></span><span class="exercise-arrow" aria-hidden="true">→</span>
+                    </a>
+                    <a class="exercise-option" data-muscle="legs" href="{{ url_for('manual_training', exercise='Lunge') }}">
+                        <span class="exercise-art exercise-art-purple" aria-hidden="true">↙</span><span><strong>Lunge</strong><small>Legs · Glutes</small></span><span class="exercise-arrow" aria-hidden="true">→</span>
+                    </a>
+                    <a class="exercise-option" data-muscle="core" href="{{ url_for('manual_training', exercise='Plank') }}">
+                        <span class="exercise-art exercise-art-blue" aria-hidden="true">━</span><span><strong>Plank</strong><small>Core · Hold</small></span><span class="exercise-arrow" aria-hidden="true">→</span>
+                    </a>
+                    <a class="exercise-option" data-muscle="upper arms" href="{{ url_for('manual_training', exercise='Pull-up') }}">
+                        <span class="exercise-art exercise-art-orange" aria-hidden="true">↑</span><span><strong>Pull-up</strong><small>Back · Arms</small></span><span class="exercise-arrow" aria-hidden="true">→</span>
+                    </a>
+                    <a class="exercise-option" data-muscle="upper arms" href="{{ url_for('manual_training', exercise='Tricep Dips') }}">
+                        <span class="exercise-art exercise-art-purple" aria-hidden="true">↓</span><span><strong>Tricep dips</strong><small>Arms · Shoulders</small></span><span class="exercise-arrow" aria-hidden="true">→</span>
+                    </a>
+                    <a class="exercise-option" data-muscle="core" href="{{ url_for('manual_training', exercise='Leg Raises') }}">
+                        <span class="exercise-art exercise-art-lime" aria-hidden="true">⌃</span><span><strong>Leg raises</strong><small>Core · Abs</small></span><span class="exercise-arrow" aria-hidden="true">→</span>
+                    </a>
+                </div>
+                <p class="no-exercises" id="no-exercises" hidden>No exercises match your search.</p>
+            </div>
+            <div class="mode-note">
+                <span class="note-icon" aria-hidden="true">i</span>
+                <span>Plan your week, enter weights and reps set by set, and use the built-in rest timer. No camera needed.</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="recent-section" aria-labelledby="recent-title">
+        <div class="recent-heading">
+            <div><p class="dashboard-eyebrow">KEEP THE MOMENTUM</p><h2 id="recent-title">Recent sessions</h2></div>
+            <a class="text-link" href="{{ url_for('history') }}">View workout history <span aria-hidden="true">→</span></a>
+        </div>
+        {% if recent_sessions %}
+        <div class="recent-list">
+            {% for session in recent_sessions %}
+            <article class="recent-row">
+                <span class="recent-exercise-icon" aria-hidden="true">✳</span>
+                <div class="recent-exercise"><strong>{{ session[2] }}</strong><small>{{ session[8][:10] }} · {{ session[3]|title }} session</small></div>
+                <div class="recent-result"><strong>{% if session[4] %}{{ session[4] }} reps{% elif session[5] %}{{ session[5] }} sec{% else %}Completed{% endif %}</strong><small>{{ session[6] // 60 }} min</small></div>
+                <span class="recent-calories">{{ session[7]|round|int }} <small>kcal</small></span>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-history">
+            <span aria-hidden="true">✳</span>
+            <div><strong>Your first session starts here</strong><p>Finish a workout and it’ll show up here with your training totals.</p></div>
+            <a class="text-link" href="{{ url_for('live_training') }}">Start moving <span aria-hidden="true">→</span></a>
+        </div>
+        {% endif %}
+    </section>
+</main>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+{% endblock %}
