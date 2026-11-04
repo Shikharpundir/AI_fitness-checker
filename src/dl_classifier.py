@@ -7,7 +7,7 @@ from tensorflow.keras.models import load_model
 class DLExerciseClassifier:
     def __init__(self, model_path="models/exercise_lstm.h5",
                  encoder_path="models/label_encoder.pkl", seq_len=30,
-                 confidence_threshold=0.6,
+                 confidence_threshold=0.4,
                  confidence_margin=0.15,
                  smoothing_window=10,
                  predict_every_n=3,
@@ -33,7 +33,7 @@ class DLExerciseClassifier:
 
     def _raw_predict(self):
         seq = np.expand_dims(np.array(self.buffer), axis=0)
-        probs = self.model.predict(seq, verbose=0)[0]
+        probs = self.model(seq, training=False).numpy()[0]
 
         sorted_idx = np.argsort(probs)[::-1]
         top_idx, second_idx = sorted_idx[:2]
@@ -78,8 +78,9 @@ class DLExerciseClassifier:
                     self.candidate_label = None
                     self.candidate_count = 0
 
-            if (raw_label == self.stable_label or
-                    self.stable_label in ("collecting...", "unknown")):
+            if raw_label == self.stable_label:
                 self.stable_confidence = raw_confidence
+            else:
+                self.stable_confidence = 0.0
 
         return self.stable_label, self.stable_confidence
