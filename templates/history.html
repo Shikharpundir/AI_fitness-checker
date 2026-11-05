@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/manual.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="history-header">
+    <h1>Your Workout History</h1>
+    {% if sessions %}
+    <form method="post" action="{{ url_for('clear_history') }}"
+          onsubmit="return confirm('Clear all of your workout history? This cannot be undone.');">
+        <button type="submit" class="btn btn-danger">Clear History</button>
+    </form>
+    {% endif %}
+</div>
+
+{% if sessions %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Exercise</th>
+                    <th>Mode</th>
+                    <th>Reps / Hold (s)</th>
+                    <th>Duration (s)</th>
+                    <th>Calories</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <!-- Extracting YYYY-MM-DD from ISO timestamp -->
+                    <td>{{ session[8][:10] }}</td> 
+                    <td>{{ session[2] }}</td>
+                    <td>{{ session[3]|title }}</td>
+                    <td>
+                        {% if session[4] %}{{ session[4] }} reps{% endif %}
+                        {% if session[5] %}{{ session[5] }} sec{% endif %}
+                        {% if session[0] in session_details %}
+                        {% set details = session_details[session[0]] %}
+                        {% set is_timed_manual = details.sets and details.sets[0].hold_seconds is defined %}
+                        <details class="manual-history-details">
+                            <summary>
+                                {{ details.sets|length }} sets
+                                {% if not is_timed_manual %} · {{ "%.1f"|format(details.volume_kg) }} kg volume{% endif %}
+                            </summary>
+                            <div class="table-container manual-history-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Set</th><th>Type</th><th>Weight</th>
+                                            {% if is_timed_manual %}
+                                            <th>Target (sec)</th><th>Held (sec)</th>
+                                            {% else %}
+                                            <th>Target</th><th>Completed</th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for set in details.sets %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ set.type }}</td>
+                                            <td>{{ set.weight_kg }} kg</td>
+                                            {% if is_timed_manual %}
+                                            <td>{{ set.hold_target_seconds }} sec</td>
+                                            <td>{{ set.hold_seconds }} sec</td>
+                                            {% else %}
+                                            <td>{{ set.reps_target }}</td>
+                                            <td>{{ set.reps_completed }}</td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% if details.notes %}<p class="manual-history-note"><strong>Notes:</strong> {{ details.notes }}</p>{% endif %}
+                            {% if details.rpe %}<p class="manual-history-note"><strong>RPE:</strong> {{ details.rpe }} / 10</p>{% endif %}
+                        </details>
+                        {% endif %}
+                    </td>
+                    <td>{{ session[6] }}</td>
+                    <td>{{ "%.1f"|format(session[7]) }}</td>
+                    <td>
+                        <form method="post"
+                              action="{{ url_for('delete_history_session', session_id=session[0]) }}"
+                              onsubmit="return confirm('Delete this workout session? This cannot be undone.');">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="card" style="margin-top: 2rem;">
+        <h2>No workouts yet!</h2>
+        <p>Head over to the dashboard to start your first session.</p>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+    </div>
+{% endif %}
+{% endblock %}
