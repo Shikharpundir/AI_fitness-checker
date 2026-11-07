@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/manual.css') }}">
+{% endblock %}
+
+{% block content %}
+<main class="manual-app" id="manual-app">
+    <header class="manual-page-heading">
+        <div>
+            <p class="manual-eyebrow"><span class="manual-eyebrow-dot"></span> NO CAMERA · YOUR PACE</p>
+            <h1>Manual workout</h1>
+            <p>Build your weekly routine, record every set, and take the rest you need.</p>
+        </div>
+        <div class="manual-profile-link">
+            {% if current_user.profile_image_path %}
+            <img class="profile-avatar" src="{{ url_for('profile_picture') }}" alt="">
+            {% else %}
+            <span class="profile-avatar" aria-hidden="true">{{ current_user.username[0]|upper }}</span>
+            {% endif %}
+            <span><strong>{{ current_user.username }}</strong><small>{{ default_rest_seconds }} sec default rest</small></span>
+        </div>
+    </header>
+
+    <div class="manual-layout">
+        <aside class="routine-column">
+            <section class="panel weekly-panel" aria-labelledby="weekly-heading">
+                <div class="panel-heading">
+                    <div>
+                        <p class="manual-eyebrow">PLAN YOUR WEEK</p>
+                        <h2 id="weekly-heading">Weekly routine</h2>
+                    </div>
+                    <span class="saved-indicator" id="plan-save-status" role="status">Saved</span>
+                </div>
+
+                <div class="weekday-tabs" role="tablist" aria-label="Choose a training day">
+                    {% for day in ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') %}
+                    <button class="weekday-tab" type="button" role="tab" id="tab-{{ day|lower }}"
+                            aria-controls="day-plan" aria-selected="false" data-day="{{ day }}">
+                        <span>{{ day[:3] }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+                <div class="plan-day-heading">
+                    <div><h3 id="selected-day-label">Today’s plan</h3><p id="planned-count">No exercises planned</p></div>
+                    <span class="day-badge" id="today-badge" hidden>TODAY</span>
+                </div>
+
+                <ul class="planned-list" id="planned-list" aria-label="Exercises planned for this day"></ul>
+                <p class="empty-plan" id="empty-plan">A rest day? Add a few exercises to plan your session.</p>
+
+                <form class="add-plan-form" id="add-plan-form">
+                    <label class="sr-only" for="plan-exercise">Exercise to add to the weekly plan</label>
+                    <select id="plan-exercise" required>
+                        <option value="">Choose an exercise</option>
+                        {% for exercise in ('Squat', 'Bicep Curl', 'Push-up', 'Lunge', 'Plank', 'Pull-up', 'Tricep Dips', 'Leg Raises') %}
+                        <option value="{{ exercise }}">{{ exercise }}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="manual-secondary-button" type="submit"><span aria-hidden="true">+</span> Add</button>
+                </form>
+            </section>
+
+            <section class="panel rest-panel" aria-labelledby="rest-heading">
+                <div class="rest-panel-top">
+                    <div>
+                        <p class="manual-eyebrow">BETWEEN YOUR SETS</p>
+                        <h2 id="rest-heading">Rest timer</h2>
+                    </div>
+                    <label class="sound-toggle">
+                        <input type="checkbox" id="rest-sound">
+                        <span class="sound-toggle-ui" aria-hidden="true"></span>
+                        <span>Beep</span>
+                    </label>
+                </div>
+                <div class="rest-timer-layout">
+                    <div class="timer-ring" id="timer-ring" role="timer" aria-live="off" aria-label="Rest timer ready">
+                        <svg viewBox="0 0 120 120" aria-hidden="true">
+                            <circle class="timer-track" cx="60" cy="60" r="52"></circle>
+                            <circle class="timer-progress" id="timer-progress" cx="60" cy="60" r="52"></circle>
+                        </svg>
+                        <div class="timer-readout"><strong id="timer-display">1:30</strong><span id="timer-caption">READY</span></div>
+                    </div>
+                    <div class="timer-controls">
+                        <label for="rest-duration">Rest duration</label>
+                        <select id="rest-duration">
+                            {% for seconds in (30, 60, 90, 120, 180, 240) %}
+                            <option value="{{ seconds }}" {% if default_rest_seconds == seconds %}selected{% endif %}>
+                                {% if seconds < 60 %}{{ seconds }} sec{% else %}{{ seconds // 60 }} min{% if seconds % 60 %} {{ seconds % 60 }} sec{% endif %}{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="timer-start-button" id="timer-start">Start rest</button>
+                        <button type="button" class="timer-reset-button" id="timer-reset">Reset timer</button>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <section class="panel workout-panel" aria-labelledby="session-heading">
+            <div class="workout-panel-heading">
+                <div>
+                    <p class="manual-eyebrow">LOG YOUR SESSION</p>
+                    <h2 id="session-heading">Today’s workout</h2>
+                    <p class="session-day-copy" id="session-day-copy">Choose exercises and enter your sets as you train.</p>
+                </div>
+                <div class="session-clock" aria-label="Workout duration">
+                    <span aria-hidden="true">◷</span><strong id="workout-clock">00:00</strong>
+                </div>
+            </div>
+
+            <div class="workout-controls">
+                <label class="exercise-picker">
+                    <span class="sr-only">Add an exercise to your workout</span>
+                    <select id="session-exercise">
+                        <option value="">Add an exercise to this workout</option>
+                        {% for exercise in ('Squat', 'Bicep Curl', 'Push-up', 'Lunge', 'Plank', 'Pull-up', 'Tricep Dips', 'Leg Raises') %}
+                        <option value="{{ exercise }}">{{ exercise }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button class="manual-primary-button" type="button" id="add-session-exercise"><span aria-hidden="true">+</span> Add exercise</button>
+            </div>
+
+            <div class="workout-exercises" id="workout-exercises"></div>
+            <div class="empty-workout" id="empty-workout">
+                <span class="empty-workout-icon" aria-hidden="true">＋</span>
+                <strong>Ready when you are</strong>
+                <p>Add an exercise or choose one from today’s routine to start logging sets.</p>
+            </div>
+
+            <footer class="workout-footer">
+                <div class="workout-summary">
+                    <span><strong id="completed-set-count">0</strong> sets completed</span>
+                    <span><strong id="volume-total">0</strong> kg total volume</span>
+                    <span><strong id="calories-total">0</strong> estimated kcal</span>
+                </div>
+                <button class="finish-workout-button" id="finish-workout" type="button" disabled>
+                    Finish & save workout <span aria-hidden="true">→</span>
+                </button>
+            </footer>
+            <p class="calorie-estimate-note">Calories are estimated from exercise intensity (MET), your saved body weight, and estimated active time. This is an estimate, not a direct measurement.</p>
+            <p class="workout-feedback" id="workout-feedback" role="status" aria-live="polite"></p>
+        </section>
+    </div>
+</main>
+
+<script>
+    window.WEEKLY_PLAN = {{ weekly_plan|tojson }};
+    window.INITIAL_EXERCISE = {{ exercise|tojson }};
+    window.CALORIE_ESTIMATION = {
+        weightKg: {{ (current_user.weight_kg or 70)|tojson }},
+        exercises: {{ calorie_exercise_metrics|tojson }}
+    };
+</script>
+<script src="{{ url_for('static', filename='js/manual.js') }}" defer></script>
+{% endblock %}
