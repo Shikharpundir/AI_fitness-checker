@@ -12,7 +12,11 @@
             <p class="dashboard-subtitle">Small steps. Stronger every session.</p>
         </div>
         <a class="profile-chip" href="{{ url_for('profile') }}" aria-label="Open your profile and preferences">
+            {% if current_user.profile_image_path %}
+            <img class="profile-avatar" src="{{ url_for('profile_picture') }}" alt="">
+            {% else %}
             <span class="profile-avatar" aria-hidden="true">{{ current_user.username[0]|upper }}</span>
+            {% endif %}
             <span>
                 <strong>Your profile</strong>
                 <small>{% if current_user.weight_kg %}{{ current_user.weight_kg }} kg{% else %}Profile details{% endif %}</small>

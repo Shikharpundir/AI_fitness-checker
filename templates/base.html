@@ -17,6 +17,14 @@
                 <a href="{{ url_for('history') }}"{% if request.endpoint == 'history' %} aria-current="page"{% endif %}>History</a>
                 <a href="{{ url_for('progress') }}"{% if request.endpoint == 'progress' %} aria-current="page"{% endif %}>Progress</a>
                 <a href="{{ url_for('feedback') }}"{% if request.endpoint == 'feedback' %} aria-current="page"{% endif %}>Feedback</a>
+                <a class="navbar-profile" href="{{ url_for('profile') }}" aria-label="Open your profile">
+                    {% if current_user.profile_image_path %}
+                    <img class="navbar-profile-picture" src="{{ url_for('profile_picture') }}" alt="">
+                    {% else %}
+                    <span class="navbar-profile-initial" aria-hidden="true">{{ current_user.username[0]|upper }}</span>
+                    {% endif %}
+                    <span>Profile</span>
+                </a>
                 <a href="{{ url_for('logout') }}">Logout</a>
             {% else %}
                 <a href="{{ url_for('login') }}"{% if request.endpoint == 'login' %} aria-current="page"{% endif %}>Login</a>
