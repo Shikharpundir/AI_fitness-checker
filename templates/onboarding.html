@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+    <h2>Complete Your Profile</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">We need a bit more info to calculate your calories accurately.</p>
+    
+    <form method="POST" action="{{ url_for('onboarding') }}">
+        <div class="form-group">
+            <label>Gender</label>
+            <select name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" step="0.1" name="weight" required placeholder="e.g. 75.5">
+        </div>
+        <button type="submit" class="btn btn-accent btn-block">Finish Setup</button>
+    </form>
+</div>
+{% endblock %}
