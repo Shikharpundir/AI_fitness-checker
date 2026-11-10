@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/progress.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<main class="progress-page">
+    <header class="progress-heading">
+        <div>
+            <p class="progress-eyebrow"><span></span> YOUR TRAINING, MADE CLEAR</p>
+            <h1>Progress at a glance</h1>
+            <p>Understand your consistency, effort, and the work you’ve put in.</p>
+        </div>
+        <div class="range-picker" role="group" aria-label="Choose progress date range">
+            <button type="button" data-days="7" aria-pressed="false">7 days</button>
+            <button type="button" data-days="30" aria-pressed="true">30 days</button>
+            <button type="button" data-days="90" aria-pressed="false">90 days</button>
+        </div>
+    </header>
+
+    <p class="progress-period" id="progress-period" aria-live="polite">Your last 30 days</p>
+    <p class="progress-error" id="progress-error" role="alert" hidden></p>
+    <section class="progress-metrics" aria-label="Progress summary">
+        <article class="progress-metric">
+            <span class="metric-icon metric-lime" aria-hidden="true">↗</span>
+            <div><span>Workouts</span><strong id="metric-workouts">—</strong><small id="metric-active-days">Active on — days</small></div>
+        </article>
+        <article class="progress-metric">
+            <span class="metric-icon metric-blue" aria-hidden="true">⟳</span>
+            <div><span>Total reps</span><strong id="metric-reps">—</strong><small id="metric-best-exercise">Across all exercises</small></div>
+        </article>
+        <article class="progress-metric">
+            <span class="metric-icon metric-orange" aria-hidden="true">✳</span>
+            <div><span>Calories burned</span><strong id="metric-calories">—</strong><small>Estimated from tracked sessions</small></div>
+        </article>
+    </section>
+
+    <section class="progress-insight" aria-live="polite">
+        <span class="insight-icon" aria-hidden="true">✦</span>
+        <div><strong id="insight-title">Your training insight</strong><p id="insight-copy">Loading your recent workout trends…</p></div>
+    </section>
+
+    <section class="weight-tracker-card" aria-labelledby="weight-tracker-title">
+        <header class="chart-card-heading">
+            <div>
+                <p class="chart-eyebrow">YOUR BODY-WEIGHT CHECK-INS</p>
+                <h2 id="weight-tracker-title">Weight & nutrition goals</h2>
+                <p>Log a check-in to see your trend and get general nutrition guidance.</p>
+            </div>
+        </header>
+        <div class="weight-tracker-layout">
+            <form class="weight-entry-form" id="weight-entry-form">
+                <div class="weight-form-fields">
+                    <div class="manual-field">
+                        <label for="weight-entry-value">Weight check-in (kg)</label>
+                        <input id="weight-entry-value" name="weight_kg" type="number" min="20" max="500" step="0.1"
+                               placeholder="e.g. 70" required>
+                    </div>
+                    <div class="manual-field">
+                        <label for="weight-entry-goal">Your goal</label>
+                        <select id="weight-entry-goal" name="goal" required>
+                            <option value="lose_weight">Lose weight</option>
+                            <option value="gain_muscle">Gain muscle</option>
+                            <option value="maintain" selected>Maintain weight</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="weight-save-button" type="submit">Save check-in</button>
+                <p class="weight-entry-status" id="weight-entry-status" role="status" aria-live="polite"></p>
+            </form>
+
+            <div class="weight-guidance" aria-live="polite">
+                <div data-guidance-goal="lose_weight" hidden>
+                    <strong>Support gradual weight loss</strong>
+                    <p>Build sustainable meals around vegetables or fruit, fibre-rich foods and protein. If appropriate for you, a modest calorie deficit may support gradual loss; avoid crash diets.</p>
+                </div>
+                <div data-guidance-goal="gain_muscle" hidden>
+                    <strong>Support muscle growth</strong>
+                    <p>Pair progressive strength training with regular meals, protein-containing foods and enough energy to recover. A small calorie surplus may help; body weight alone cannot show how much muscle you gain.</p>
+                </div>
+                <div data-guidance-goal="maintain">
+                    <strong>Support weight maintenance</strong>
+                    <p>Aim for regular balanced meals with protein, produce and fibre-rich foods. Use your longer-term trend, activity and hunger as context rather than reacting to one reading.</p>
+                </div>
+                <p class="weight-guidance-note">This is general education, not a personalized diet or medical advice. For individual needs, consult a registered dietitian or healthcare professional.</p>
+            </div>
+        </div>
+        <div class="weight-trend-summary" aria-live="polite">
+            <span>Latest check-in</span>
+            <strong id="weight-latest">No entries yet</strong>
+            <small id="weight-change">Add a check-in to start your chart.</small>
+        </div>
+        <div class="chart-frame chart-frame-tall weight-chart-frame">
+            <canvas id="weightChart" role="img" aria-label="Body weight check-ins over time" hidden></canvas>
+            <p class="chart-empty" id="weight-chart-empty">Your weight history will appear here after your first check-in.</p>
+        </div>
+        <p class="weight-guidance-note">Short-term weight changes are normal and do not by themselves show fat or muscle changes. Avoid making diet decisions from a single reading.</p>
+        <p class="weight-entry-error" id="weight-entry-error" role="alert" hidden></p>
+
+        <section class="meal-plan" aria-labelledby="meal-plan-title">
+            <header class="meal-plan-heading">
+                <div>
+                    <p class="chart-eyebrow">A SIMPLE DAY OF EATING</p>
+                    <h3 id="meal-plan-title">A balanced day</h3>
+                    <p id="meal-plan-subtitle">A flexible meal outline to support your goal.</p>
+                </div>
+                <span class="meal-plan-badge" id="meal-plan-badge">Steady & balanced</span>
+            </header>
+            <div class="meal-goal-picker" role="group" aria-label="Choose a meal plan goal">
+                <button type="button" data-meal-goal="lose_weight" aria-pressed="false">Lose weight</button>
+                <button type="button" data-meal-goal="maintain" aria-pressed="true">Maintain</button>
+                <button type="button" data-meal-goal="gain_muscle" aria-pressed="false">Gain muscle</button>
+            </div>
+            <div class="meal-preference-row">
+                <span>Food style</span>
+                <div class="meal-preference-picker" role="group" aria-label="Choose food preferences">
+                    <button type="button" data-meal-preference="vegetarian" aria-pressed="true">Vegetarian</button>
+                    <button type="button" data-meal-preference="vegan" aria-pressed="false">Vegan</button>
+                    <button type="button" data-meal-preference="omnivore" aria-pressed="false">Includes meat/fish</button>
+                </div>
+            </div>
+            <div class="meal-completion" aria-live="polite">
+                <div class="meal-completion-copy">
+                    <strong id="meal-completion-count">0 of 5 meals checked</strong>
+                    <span id="meal-completion-message">Tap a meal when you have eaten it.</span>
+                </div>
+                <progress id="meal-completion-progress" max="5" value="0" aria-label="Meals checked during this visit"></progress>
+            </div>
+            <p class="meal-plan-principle" id="meal-plan-principle"></p>
+            <div class="meal-plan-grid" id="meal-plan-grid" aria-live="polite"></div>
+            <p class="meal-plan-note">Example meals only—not a prescribed diet or calorie target. Adjust portions to your needs, preferences, allergies, and activity. A registered dietitian can personalize a plan.</p>
+        </section>
+    </section>
+
+    <section class="chart-grid" aria-label="Workout progress charts">
+        <article class="chart-card chart-card-wide">
+            <header class="chart-card-heading">
+                <div><p class="chart-eyebrow">SHOW UP & BUILD</p><h2>Your workout rhythm</h2><p>Workouts by day. Empty days are included.</p></div>
+                <span class="chart-legend"><i class="legend-sessions"></i> Sessions</span>
+            </header>
+            <div class="chart-frame chart-frame-tall" id="activity-frame">
+                <canvas id="activityChart" role="img" aria-label="Daily workouts"></canvas>
+                <p class="chart-empty" hidden>No workout data for this period yet. Start a workout to see your activity here.</p>
+            </div>
+        </article>
+
+        <article class="chart-card">
+            <header class="chart-card-heading">
+                <div><p class="chart-eyebrow">MOVEMENTS THAT ADD UP</p><h2>Reps by exercise</h2><p>See which exercises make up your training.</p></div>
+            </header>
+            <div class="chart-frame chart-frame-bars" id="exercise-frame">
+                <canvas id="exerciseChart" role="img" aria-label="Completed reps for each exercise"></canvas>
+                <p class="chart-empty" hidden>Rep totals will appear after you complete a tracked workout.</p>
+            </div>
+        </article>
+
+        <article class="chart-card">
+            <header class="chart-card-heading">
+                <div><p class="chart-eyebrow">EFFORT OVER TIME</p><h2>Estimated calories</h2><p>Daily estimated burn from your recorded sessions.</p></div>
+            </header>
+            <div class="chart-frame chart-frame-tall" id="calories-frame">
+                <canvas id="caloriesChart" role="img" aria-label="Estimated calories burned each day"></canvas>
+                <p class="chart-empty" hidden>No calorie data for this period yet.</p>
+            </div>
+        </article>
+    </section>
+
+    <p class="progress-footnote">Calories are estimates based on your recorded workout sessions.</p>
+</main>
+<script src="{{ url_for('static', filename='js/charts.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/weight-tracker.js') }}" defer></script>
+{% endblock %}
