@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/challenge.css') }}">
+{% endblock %}
+{% block content %}
+<main class="challenge-container">
+    <header class="challenge-header">
+        <h1>1v1 Push-up Challenge</h1>
+        <p>Invite a friend and see who completes the most push-ups in 60 seconds.</p>
+    </header>
+
+    <section class="challenge-setup" id="challenge-setup">
+        <button class="btn btn-primary" id="create-challenge">Create challenge</button>
+        <div class="join-challenge">
+            <label for="room-code">Join with a room code</label>
+            <div class="join-controls">
+                <input id="room-code" maxlength="6" autocomplete="off" placeholder="6-character code">
+                <button class="btn btn-accent" id="join-challenge">Join</button>
+            </div>
+        </div>
+    </section>
+
+    <p class="challenge-status" id="challenge-status" role="status" aria-live="polite">
+        Create a room and share its code, or enter a friend's code.
+    </p>
+
+    <section class="challenge-room" id="challenge-room" hidden>
+        <p class="room-code-line">Room code: <strong id="challenge-room-code"></strong></p>
+        <div class="challenge-scoreboard">
+            <article class="challenge-score-card">
+                <h2 id="my-name">You</h2>
+                <output id="my-score">0</output>
+                <span>push-ups</span>
+            </article>
+            <div class="challenge-clock">
+                <span id="challenge-clock">60</span>
+                <small>seconds</small>
+            </div>
+            <article class="challenge-score-card">
+                <h2 id="opponent-name">Opponent</h2>
+                <output id="opponent-score">0</output>
+                <span>push-ups</span>
+            </article>
+        </div>
+        <div class="challenge-video">
+            <video id="challenge-webcam" autoplay muted playsinline></video>
+        </div>
+    </section>
+</main>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+<script src="{{ url_for('static', filename='js/pushup_challenge.js') }}"></script>
+{% endblock %}
